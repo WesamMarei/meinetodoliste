@@ -1,18 +1,33 @@
 package com.example.demo;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.web.bind.annotation.*;
 import java.util.List;
+
 @CrossOrigin(origins = "*")
 @RestController
+@RequestMapping("/api/v1/recipes")
 public class RecipeController {
 
-    @GetMapping("/api/v1/recipes")
+    private final RecipeRepository repository;
+
+    public RecipeController(RecipeRepository repository) {
+        this.repository = repository;
+        if (repository.count() == 0) {
+            repository.saveAll(List.of(
+                    new Recipe("Spaghetti Bolognese", 30, "Pasta"),
+                    new Recipe("Kürbissuppe", 45, "Suppen"),
+                    new Recipe("Pancakes", 15, "Frühstück")
+            ));
+        }
+    }
+
+    @GetMapping
     public List<Recipe> getRecipes() {
-        return List.of(
-                new Recipe(1L, "Spaghetti Bolognese", 30, "Pasta"),
-                new Recipe(2L, "Kürbissuppe", 45, "Suppen"),
-                new Recipe(3L, "Pancakes", 15, "Frühstück")
-        );
+        return repository.findAll();
+    }
+
+    @PostMapping
+    public Recipe createRecipe(@RequestBody Recipe recipe) {
+        return repository.save(recipe);
     }
 }
